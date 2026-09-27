@@ -1,0 +1,40 @@
+
+=================================================================
+  CURBO TRANSCRIPTION EVALUATION REPORT
+=================================================================
+  Samples evaluated : 10  |  Missing files: 0
+-----------------------------------------------------------------
+
+  [1] TRANSCRIPTION ACCURACY
+      Average WER          : 0.314  (31.4% word error)
+      Average CER          : 0.136  (13.6% char error)
+      Domain KW Hit Rate   : 90.0%
+      Avg Latency          : 482 ms
+      Hallucinations       : 0 / 10
+
+  [2] INTENT PARSING ACCURACY
+      Overall Intent Acc   : 100.0%  (10/10)
+      NAVIGATE Intent Acc  : 100.0%  (9/9)
+      Destination Acc      : 100.0%  (10/10)
+      Nav Dest Acc         : 100.0%  (9/9)
+      Waypoint ID Acc      : 100.0%  (10/10)
+      Avg Confidence Score : 0.89
+
+  [3] PER-SAMPLE BREAKDOWN
+  File                                             WER  Intent    Dest  Lat(ms)
+  ---------------------------------------------------------------
+  wher_is_hr_office.wav                          0.750      OK      OK      630
+  where_is_hr_office.wav                         0.400      OK      OK      402
+  Where_is_the_exam_cell.wav                     0.200      OK      OK      399
+  take_me_to_reception.wav                       0.200      OK      OK      442
+  Can _you_show_me_the_cafeteria.wav             0.167      OK      OK      448
+  Can_you_guide_me_to_reception.wav              0.286      OK      OK      459
+  I_need_to_go_to_the_HOD_office.wav             0.250      OK      OK      525
+  Where is_the_canteen.wav                       0.500      OK      OK      431
+  where_is_my_office.wav                         0.250      OK      OK      402
+  tests_jfk.wav                                  0.136      OK      OK      677
+
+  [5] FAILURE ANALYSIS
+      All samples passed intent + destination checks!
+
+=================================================================

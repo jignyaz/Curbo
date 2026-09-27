@@ -1,0 +1,64 @@
+CURBO CAMPUS GUIDE ROBOT - PROJECT DETAILS & OVERVIEW
+=====================================================
+
+1. WHAT IS THIS PROJECT?
+------------------------
+Curbo is an interactive, autonomous Campus Guide & Navigation Kiosk Robot. It is designed to assist campus visitors, students, and faculty members by accepting natural language spoken voice queries or touch input on a kiosk display, identifying target campus destinations (e.g., "Where is the Exam Cell?", "Take me to reception"), mapping them to precise hardware waypoint IDs, speaking spoken audio confirmations, and showing live robot telemetry on an interactive web interface.
+
+The project is built to run on Raspberry Pi 5 or standard PC hardware integrated with a touchscreen display, microphone array, speakers, and robot mobility controller (ROS 2/Nav2 hardware stack).
+
+
+2. TECHNOLOGIES & FRAMEWORKS USED
+---------------------------------
+- Programming Languages: Python 3.10+ (Backend & NLP/Speech Core), JavaScript ES6+ (Frontend Web Kiosk), HTML5 & CSS3 (Web UI).
+- Speech-to-Text (STT): OpenAI Whisper ('base' model) with domain prompt conditioning for accurate technical acronym & campus venue detection.
+- Audio Processing: sounddevice, numpy, wave, peak gain normalization (AudioPreprocessor) to handle quiet/noisy user inputs.
+- Voice Activity Detection (VAD): Energy RMS thresholding & silence timeout recording in LiveMicRecorder.
+- Natural Language Processing & Intent Matching: RapidFuzz (fuzz.partial_ratio) fuzzy matching, alias dictionary, keyword hit matching, zero-temperature prompt priming.
+- Text-to-Speech (TTS): pyttsx3 (Offline TTS compatible with Windows SAPI5 and Raspberry Pi eSpeak-ng), Web Speech API SpeechSynthesis on the web interface.
+- Web Server & Framework: Flask (Python REST API), flask-cors (CORS support).
+- Web UI & Visualization: Animated HTML5 Canvas backdrop, Interactive SVG Node Map with smooth CSS transform marker movement, touch-optimized responsive card layout, modern glassmorphic/dark/light aesthetic styling.
+- Evaluation & Benchmarking: Custom evaluation harness (evaluate_transcription.py) evaluating Word Error Rate (WER), Character Error Rate (CER), Keyword Hit Rate, Intent Accuracy, Waypoint Match Rate, Hallucination Rate, and Latency against ground-truth WAV files.
+
+
+3. CORE METHODS & ALGORITHMS IMPLEMENTED
+----------------------------------------
+1. Audio Gain Normalization (AudioPreprocessor.normalize_waveform):
+   Scales input waveform peak amplitude to 0.95 max to normalize low-volume speech or quiet microphone feeds before sending to Whisper.
+
+2. Energy-based Voice Activity Detection (LiveMicRecorder.record_with_vad):
+   Calculates Root Mean Square (RMS) energy across audio chunks (chunk_duration = 0.1s).
+   Triggers recording when RMS > energy_threshold (0.015) and auto-terminates after a continuous silence period (silence_timeout = 1.3s) or max duration (8.0s).
+
+3. Domain Prompt Conditioning (STTEngine.transcribe):
+   Feeds a structured domain_prompt containing all campus acronyms and venue names to Whisper to bias the decoder, preventing misrecognitions on technical jargon (e.g., HOD, CSE, VLSI, Xerox).
+   Set to temperature=0.0 and condition_on_previous_text=False to eliminate model hallucinations.
+
+4. Fuzzy Two-Tier Intent Classification (IntentParser.parse):
+   - Tier 1 (Motion Commands): Matches incoming text against motion triggers (STOP, SLOW_DOWN, SPEED_UP, RESUME, CANCEL) using exact substring and fuzz.partial_ratio threshold >= 90%.
+   - Tier 2 (Destination Mapping): Matches against 25+ destination dictionaries containing canonical names, waypoint IDs, and alias arrays. Matches exact alias for 100% confidence or highest fuzzy match above 80%.
+   - Tier 3 (Fallback): Maps unrecognized inputs to CONVERSATION intent with polite prompts asking the user to rephrase.
+
+5. Evaluation Levenshtein Metric (evaluate_transcription.py):
+   Computes Word Error Rate (WER = (S + D + I) / N) and Character Error Rate (CER) against ground-truth audio test suites.
+
+
+4. SATISFIED REQUIREMENTS
+-------------------------
+[x] Offline Speech-to-Text Processing: Integrated Whisper 'base' with domain-priming prompts.
+[x] Hands-Free Audio Capture: Energy-based Voice Activity Detection (VAD) live microphone recorder.
+[x] Comprehensive Campus Destination KB: 25+ structured waypoints across Administration, Academic Departments, Labs, Facilities, and Amenities with extensive alias sets.
+[x] Motion Control Parsing: Support for emergency stop, slow down, speed up, and resume commands.
+[x] Spoken Voice Feedback (TTS): Offline text-to-speech output via pyttsx3 and browser TTS fallback.
+[x] Web Kiosk & Touch Navigation Console: Flask REST API server + web app with category filters and search.
+[x] Interactive Campus Node Map: SVG map displaying node locations and dynamic movement of the robot icon marker.
+[x] Evaluation & Accuracy Benchmarking: Automated evaluation harness achieving 100.0% Intent Accuracy, 100.0% Destination Accuracy, 100.0% Waypoint ID Accuracy, and 90.0% Domain Keyword Hit Rate across test audio files (eval_report.txt).
+
+
+5. PENDING / FUTURE SOFTWARE ENHANCEMENTS
+-----------------------------------------
+[ ] Real-Time Telemetry Streaming (WebSocket / SSE): Replace periodic HTTP GET polling (/api/status) with Server-Sent Events (SSE) or WebSockets for real-time battery and position updates.
+[ ] Audio Upload API (/api/voice_navigate): Allow frontend Web UI to record browser mic audio and send raw WAV directly to Python backend Whisper STT engine.
+[ ] Multi-Turn Campus FAQ Knowledge Base: Extend IntentParser to handle campus general knowledge questions (e.g. college timings, principal details, fee payment instructions).
+[ ] Multi-Lingual Voice Support: Extend STT domain prompts and TTS engines to support local regional languages (e.g., Hindi, Telugu, Tamil).
+[ ] Noise Suppression Filter: Add active noise cancellation (e.g., RNNoise) before Whisper transcription to handle noisy outdoor environments.
