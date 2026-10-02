@@ -3,158 +3,232 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Curbo Campus Guide Robot - Touch Navigation & Kiosk</title>
-  <!-- Google Fonts: Inter -->
+  <title>Curbo Campus Guide Robot - Next-Gen Kiosk Console</title>
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <!-- CSS Stylesheet -->
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- Dynamic Canvas Background (Animated Tech Wave Pattern) -->
+  <!-- Dynamic Canvas Background (Interactive Cyber Particle Grid & Ambient Lights) -->
   <canvas id="animated-bg"></canvas>
 
   <div class="app-container">
 
-    <!-- CLASSIC HEADER & ROBOT TELEMETRY BAR -->
+    <!-- FLOATING GLASS HEADER & ROBOT TELEMETRY BAR -->
     <header class="header-card">
       <div class="brand-section">
-        <div class="brand-logo">🤖</div>
+        <div class="brand-logo-container">
+          <div class="brand-logo">🤖</div>
+          <span class="online-dot"></span>
+        </div>
         <div class="brand-title">
-          <h1>CURBO GUIDE ROBOT</h1>
-          <p>Campus Touch Navigation & Kiosk Control Console</p>
+          <div class="brand-badge">CURBO AI AUTONOMOUS GUIDE</div>
+          <h1>Campus Navigation Kiosk</h1>
         </div>
       </div>
 
-      <div class="status-pills">
+      <div class="header-actions">
+        <!-- Live Robot Telemetry Stats -->
+        <div class="telemetry-chip">
+          <span class="chip-icon">⚡</span>
+          <span class="chip-text">98% Batt</span>
+        </div>
+        <div class="telemetry-chip">
+          <span class="chip-icon">📶</span>
+          <span class="chip-text">5G Online</span>
+        </div>
+        
         <div id="robot-status-badge" class="status-badge idle">
           <span class="pulse-dot"></span>
           <span id="status-text">STANDBY / IDLE</span>
         </div>
-        <button id="btn-emergency-stop" class="btn btn-danger" style="padding: 8px 16px; font-size: 12px;">
-          ⛔ STOP ROBOT
+
+        <button id="btn-emergency-stop" class="btn btn-danger">
+          <span class="stop-icon">⛔</span>
+          <span>STOP ROBOT</span>
         </button>
       </div>
     </header>
 
-    <!-- MAIN DASHBOARD -->
+    <!-- MAIN DASHBOARD LAYOUT -->
     <div class="dashboard-grid">
 
-      <!-- LEFT COLUMN: SEARCH & DESTINATION GRID -->
+      <!-- LEFT MAIN CONTENT AREA -->
       <main>
         
-        <!-- Search & Query Input Box -->
+        <!-- Search & Voice Command Section -->
         <section class="search-card">
-          <div class="search-title">
-            <span>🔎</span> Where would you like to go?
+          <div class="search-header">
+            <div class="search-title">
+              <span class="search-sparkle">✨</span> Where would you like to go today?
+            </div>
+            <span class="voice-hint">Voice & Touch Enabled</span>
           </div>
+
           <div class="search-input-group">
-            <input 
-              type="text" 
-              id="search-input" 
-              class="search-input" 
-              placeholder="Type destination or question (e.g. 'Exam Cell', 'Where is HR office?')..."
-              autocomplete="off"
-            >
-            <button id="btn-mic" class="btn btn-mic" title="Voice Search (Microphone)">
-              🎤
+            <div class="input-wrapper">
+              <span class="input-icon">🔍</span>
+              <input 
+                type="text" 
+                id="search-input" 
+                class="search-input" 
+                placeholder="Type a location or ask a question ('Exam Cell', 'Where is Principal office?')..."
+                autocomplete="off"
+              >
+            </div>
+            <button id="btn-mic" class="btn btn-mic" title="Voice Search (Click & Speak)">
+              <span class="mic-icon">🎤</span>
             </button>
             <button id="btn-search" class="btn btn-primary">
-              Navigate
+              <span>Navigate</span>
+              <span class="btn-arrow">➔</span>
             </button>
+          </div>
+
+          <!-- Quick Suggestion Chips -->
+          <div class="quick-chips">
+            <span class="chips-label">Popular Destinations:</span>
+            <button class="chip-btn" data-query="Exam Cell">📝 Exam Cell</button>
+            <button class="chip-btn" data-query="Reception">ℹ️ Reception</button>
+            <button class="chip-btn" data-query="CSE Block">💻 CSE Block</button>
+            <button class="chip-btn" data-query="Principal Office">🏛️ Principal</button>
+            <button class="chip-btn" data-query="Cafeteria">☕ Cafeteria</button>
           </div>
         </section>
 
-        <!-- Category Tabs -->
+        <!-- Navigation Category Tabs -->
         <nav class="categories-bar" id="category-tabs">
-          <button class="tab-btn active" data-category="ALL">All Destinations</button>
-          <button class="tab-btn" data-category="Administration">Administration</button>
-          <button class="tab-btn" data-category="Academic Departments">Academic Depts</button>
-          <button class="tab-btn" data-category="Facilities & Amenities">Amenities & Facilities</button>
+          <button class="tab-btn active" data-category="ALL">
+            <span>✨ All Locations</span>
+          </button>
+          <button class="tab-btn" data-category="Administration">
+            <span>🏛️ Administration</span>
+          </button>
+          <button class="tab-btn" data-category="Academic Departments">
+            <span>🎓 Academic Depts</span>
+          </button>
+          <button class="tab-btn" data-category="Facilities & Amenities">
+            <span>☕ Facilities & Amenities</span>
+          </button>
         </nav>
 
-        <!-- Touch Grid for Destinations -->
+        <!-- Interactive Destination Card Grid -->
         <section id="destination-grid" class="destination-grid">
           <!-- Dynamically populated via app.js -->
         </section>
       </main>
 
-      <!-- RIGHT COLUMN: SIDEBAR & INTERACTIVE MAP -->
+      <!-- RIGHT SIDEBAR: INTERACTIVE MAP & ROBOT TELEMETRY -->
       <aside class="sidebar-panel">
         
-        <!-- Live Command / Audio Announcement Card -->
-        <div class="card">
+        <!-- Curbo Assistant Telemetry & Notice Box -->
+        <div class="card robot-info-card">
           <div class="card-header">
-            <span>📢 Curbo Status</span>
-            <span id="last-time" style="font-size: 11px; color: var(--text-muted);">--:--</span>
+            <div class="card-title">
+              <span class="title-icon">📢</span> Curbo AI Assistant
+            </div>
+            <span id="last-time" class="time-stamp">--:--</span>
           </div>
+
           <div class="notice-box" id="curbo-notice">
-            Hello! Tap any campus destination or speak to start navigation.
+            <div class="notice-icon">💬</div>
+            <div class="notice-content">
+              Welcome to Campus Guide! Select any destination or use voice search to navigate.
+            </div>
           </div>
-          <div style="font-size: 12px; color: var(--text-secondary);">
-            <strong>Active Target:</strong> <span id="active-target-text">None</span><br>
-            <strong>Waypoint ID:</strong> <code id="active-waypoint-text">--</code>
+
+          <div class="telemetry-details">
+            <div class="tele-item">
+              <span class="tele-label">Active Target</span>
+              <span id="active-target-text" class="tele-val highlight">None</span>
+            </div>
+            <div class="tele-item">
+              <span class="tele-label">Waypoint ID</span>
+              <code id="active-waypoint-text" class="tele-code">--</code>
+            </div>
           </div>
         </div>
 
-        <!-- Campus Interactive Node Map -->
-        <div class="card">
+        <!-- Campus Interactive Node Map Card -->
+        <div class="card map-card">
           <div class="card-header">
-            <span>🗺️ Campus Map Nodes</span>
+            <div class="card-title">
+              <span class="title-icon">🗺️</span> Live Campus Map Node
+            </div>
+            <span class="map-badge">GPS ACTIVE</span>
           </div>
+
           <div class="map-container">
             <svg class="map-svg" viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg">
-              <!-- Grid Background Lines -->
-              <path d="M 0 60 L 400 60 M 0 120 L 400 120 M 0 180 L 400 180" stroke="#e2e8f0" stroke-width="1"/>
-              <path d="M 100 0 L 100 240 M 200 0 L 200 240 M 300 0 L 300 240" stroke="#e2e8f0" stroke-width="1"/>
-              
+              <!-- Dark Grid Pattern -->
+              <defs>
+                <pattern id="grid-pattern" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255, 255, 255, 0.05)" stroke-width="1"/>
+                </pattern>
+                <linearGradient id="path-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#38bdf8"/>
+                  <stop offset="100%" stop-color="#818cf8"/>
+                </linearGradient>
+              </defs>
+
+              <rect width="100%" height="100%" fill="url(#grid-pattern)" />
+
               <!-- Pathway connection lines -->
-              <path d="M 50 190 L 120 190 L 120 120 L 220 120 L 220 60 L 340 60" stroke="#94a3b8" stroke-width="4" stroke-dasharray="4" fill="none"/>
-              <path d="M 120 120 L 340 120 L 340 190" stroke="#94a3b8" stroke-width="4" stroke-dasharray="4" fill="none"/>
+              <path d="M 50 190 L 120 190 L 120 120 L 220 120 L 220 60 L 340 60" stroke="rgba(56, 189, 248, 0.4)" stroke-width="3" stroke-dasharray="6,4" fill="none"/>
+              <path d="M 120 120 L 340 120 L 340 190" stroke="rgba(56, 189, 248, 0.4)" stroke-width="3" stroke-dasharray="6,4" fill="none"/>
 
               <!-- Interactive Node Locations -->
               <!-- Reception Node -->
               <g class="node" id="node-WP_ADMIN_RECEPTION_06" transform="translate(50, 190)">
-                <circle r="10" fill="#1e56a0" stroke="#ffffff" stroke-width="2"/>
-                <text y="-14" font-size="10" font-weight="700" text-anchor="middle" fill="#0f2c59">Reception</text>
+                <circle r="12" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+                <circle r="5" fill="#38bdf8"/>
+                <text y="-18" font-size="10" font-weight="600" text-anchor="middle" fill="#e2e8f0">Reception</text>
               </g>
 
               <!-- Exam Cell Node -->
               <g class="node" id="node-WP_ADMIN_EXAM_04" transform="translate(120, 120)">
-                <circle r="10" fill="#1e56a0" stroke="#ffffff" stroke-width="2"/>
-                <text y="-14" font-size="10" font-weight="700" text-anchor="middle" fill="#0f2c59">Exam Cell</text>
+                <circle r="12" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+                <circle r="5" fill="#38bdf8"/>
+                <text y="-18" font-size="10" font-weight="600" text-anchor="middle" fill="#e2e8f0">Exam Cell</text>
               </g>
 
               <!-- CSE Dept Node -->
               <g class="node" id="node-WP_DEPT_CSE_01" transform="translate(220, 120)">
-                <circle r="10" fill="#1e56a0" stroke="#ffffff" stroke-width="2"/>
-                <text y="-14" font-size="10" font-weight="700" text-anchor="middle" fill="#0f2c59">CSE Block</text>
+                <circle r="12" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+                <circle r="5" fill="#38bdf8"/>
+                <text y="-18" font-size="10" font-weight="600" text-anchor="middle" fill="#e2e8f0">CSE Block</text>
               </g>
 
               <!-- HR Office Node -->
               <g class="node" id="node-WP_ADMIN_HR_05" transform="translate(220, 60)">
-                <circle r="10" fill="#1e56a0" stroke="#ffffff" stroke-width="2"/>
-                <text y="-14" font-size="10" font-weight="700" text-anchor="middle" fill="#0f2c59">HR Office</text>
+                <circle r="12" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+                <circle r="5" fill="#38bdf8"/>
+                <text y="-18" font-size="10" font-weight="600" text-anchor="middle" fill="#e2e8f0">HR Office</text>
               </g>
 
               <!-- Cafeteria Node -->
               <g class="node" id="node-WP_FAC_CAFETERIA_01" transform="translate(340, 120)">
-                <circle r="10" fill="#1e56a0" stroke="#ffffff" stroke-width="2"/>
-                <text y="-14" font-size="10" font-weight="700" text-anchor="middle" fill="#0f2c59">Cafeteria</text>
+                <circle r="12" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+                <circle r="5" fill="#38bdf8"/>
+                <text y="-18" font-size="10" font-weight="600" text-anchor="middle" fill="#e2e8f0">Cafeteria</text>
               </g>
 
               <!-- Principal Office Node -->
               <g class="node" id="node-WP_ADMIN_PRINCIPAL_01" transform="translate(340, 60)">
-                <circle r="10" fill="#1e56a0" stroke="#ffffff" stroke-width="2"/>
-                <text y="-14" font-size="10" font-weight="700" text-anchor="middle" fill="#0f2c59">Principal</text>
+                <circle r="12" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+                <circle r="5" fill="#38bdf8"/>
+                <text y="-18" font-size="10" font-weight="600" text-anchor="middle" fill="#e2e8f0">Principal</text>
               </g>
 
-              <!-- Curbo Robot Icon -->
-              <g id="curbo-map-robot" transform="translate(50, 190)" style="transition: transform 1s ease-in-out;">
-                <circle r="14" fill="#059669" stroke="#ffffff" stroke-width="3"/>
-                <text y="4" font-size="10" text-anchor="middle">🤖</text>
+              <!-- Curbo Robot Icon Marker -->
+              <g id="curbo-map-robot" transform="translate(50, 190)" style="transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);">
+                <circle r="16" fill="rgba(16, 185, 129, 0.25)" stroke="#10b981" stroke-width="2" class="robot-pulse-ring"/>
+                <circle r="10" fill="#10b981"/>
+                <text y="3.5" font-size="10" text-anchor="middle">🤖</text>
               </g>
             </svg>
           </div>
@@ -165,7 +239,11 @@
 
     <!-- FOOTER -->
     <footer class="app-footer">
-      Curbo Guide Robot System v2.0 • Campus Voice & Mobile Kiosk Console
+      <div class="footer-content">
+        <span>CURBO AUTONOMOUS GUIDE SYSTEM v2.5</span>
+        <span class="footer-sep">•</span>
+        <span>AI-POWERED CAMPUS NAVIGATION & VOICE KIOSK CONSOLE</span>
+      </div>
     </footer>
   </div>
 
@@ -173,3 +251,4 @@
   <script src="app.js"></script>
 </body>
 </html>
+

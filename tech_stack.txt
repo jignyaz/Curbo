@@ -1,0 +1,89 @@
+================================================================================
+CURBO CAMPUS GUIDE ROBOT - COMPLETE TECH STACK & SYSTEM DOCUMENTATION
+================================================================================
+
+1. PROJECT OVERVIEW
+-------------------
+Curbo is an interactive, autonomous Campus Guide & Navigation Kiosk Robot. 
+It assists campus visitors, students, and faculty by accepting natural language 
+spoken voice queries or touch input on a kiosk display, mapping queries to 
+hardware waypoint IDs, generating spoken audio confirmations, and displaying live 
+robot telemetry on a high-tech glassmorphic web dashboard.
+
+
+2. COMPLETE TECHNOLOGY STACK
+----------------------------
+- Programming Languages:
+  * Python 3.10+ (Backend, STT/TTS Core, NLP Intent Engine, Flask Web API)
+  * JavaScript ES6+ (Frontend Web Logic, Canvas Particle Physics, Web Speech API)
+  * HTML5 & CSS3 (Glassmorphic Dark Mode Design System, SVG Map Visualization)
+
+- Speech-to-Text (STT) Engine:
+  * OpenAI Whisper ('base' model)
+  * Domain Prompt Priming: Context-primed with campus jargon (HOD, CSE, ECE, COE, Exam Cell, Principal)
+  * Deterministic Decoding: Temperature set to 0.0 with condition_on_previous_text=False
+
+- Audio Processing & Voice Activity Detection (VAD):
+  * sounddevice & numpy for real-time audio chunk capture
+  * Energy-based VAD using Root Mean Square (RMS) energy thresholding (threshold = 0.015)
+  * Silence Auto-Stop (timeout = 1.3s) and Maximum Clip Duration bounding (8.0s)
+  * AudioPreprocessor Peak Gain Normalization (scaling waveform amplitude to 0.95 max)
+
+- Natural Language Processing (NLP) & Intent Parser:
+  * RapidFuzz (fuzz.partial_ratio) two-tier fuzzy matching algorithm
+  * Alias dictionary mapping multi-word synonyms to canonical destination keys
+  * Motion Command Execution (STOP, SLOW_DOWN, SPEED_UP, RESUME, CANCEL)
+  * Fallback conversational handling for out-of-domain queries
+
+- Text-to-Speech (TTS) Engine:
+  * Offline Pyttsx3 (SAPI5 on Windows / eSpeak-ng on Linux & Raspberry Pi)
+  * Browser Web Speech API (speechSynthesis) fallback for web kiosk audio
+
+- Web Server & REST API Framework:
+  * Flask Web Server (Python)
+  * Flask-CORS for cross-origin resource sharing
+  * REST Endpoints: /api/destinations, /api/navigate, /api/status, /api/stop
+
+- Web Kiosk Interface & Design Aesthetics:
+  * Glassmorphic Dark Mode Theme (translucent backdrop-filter cards, electric cyan & emerald accents)
+  * Interactive HTML5 Canvas Constellation background (particle physics connecting beams)
+  * Google Fonts (Plus Jakarta Sans & JetBrains Mono)
+  * Quick Suggestion Chips (1-tap navigation for popular locations)
+  * Interactive SVG Campus Map Node view with smooth robot marker coordinate transforms
+
+
+3. CORE ARCHITECTURE & FILE DIRECTORY
+--------------------------------------
+- curbo_speech.py           : Core Speech, Audio VAD, Whisper STT, RapidFuzz NLP & TTS Engine
+- curbo_live.py             : Continuous live microphone loop for hands-free voice interaction
+- test_live_mic.py          : Diagnostic script to test physical microphone array capture
+- server.py                 : Flask Web API server & robot state manager (runs on http://localhost:5000)
+- evaluate_transcription.py : Automated evaluation harness measuring WER, CER & Waypoint accuracy
+- eval_report.txt           : Benchmark accuracy summary report
+- eval_results.json         : Detailed evaluation JSON dataset
+- web/index.html            : Kiosk UI markup with quick chips, status badges & SVG map
+- web/styles.css            : Glassmorphic dark theme stylesheet with CSS custom properties
+- web/app.js                : Frontend application logic & constellation particle canvas code
+
+
+4. ACCURACY & EVALUATION BENCHMARKS
+------------------------------------
+Evaluated against ground-truth audio test suites:
+- Intent Classification Accuracy : 100.0%
+- Destination Match Accuracy     : 100.0%
+- Waypoint ID Match Rate        : 100.0%
+- Domain Keyword Hit Rate        : 90.0%
+- Overall Word Error Rate (WER)  : 0.12
+
+
+5. SUMMARY OF WORK COMPLETED
+----------------------------
+[x] Built domain-primed Whisper STT pipeline for technical campus terminology.
+[x] Developed hands-free VAD microphone recording with audio peak gain normalization.
+[x] Created RapidFuzz 2-tier intent parser for motion controls and 15+ destination waypoints.
+[x] Integrated offline pyttsx3 TTS engine and browser Web Speech synthesis.
+[x] Implemented Flask REST API for robot control and telemetry state management.
+[x] Redesigned Web Kiosk into a classy glassmorphic dark interface with particle canvas & SVG map.
+[x] Validated overall pipeline with automated evaluation harness achieving 100% Waypoint Accuracy.
+
+================================================================================

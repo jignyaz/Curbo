@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CURBO CAMPUS GUIDE ROBOT - FRONTEND APPLICATION SCRIPT
+   CURBO CAMPUS GUIDE ROBOT - NEXT-GEN FRONTEND SCRIPT
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -37,6 +37,16 @@ document.addEventListener('DOMContentLoaded', () => {
     'WP_ADMIN_DEAN_02': { x: 340, y: 60 }
   };
 
+  // Map Waypoint to Key mapping for map clickability
+  const waypointToKey = {
+    'WP_ADMIN_RECEPTION_06': 'RECEPTION',
+    'WP_ADMIN_EXAM_04': 'EXAM_CELL',
+    'WP_DEPT_CSE_01': 'CSE_DEPARTMENT',
+    'WP_ADMIN_HR_05': 'HR_OFFICE',
+    'WP_FAC_CAFETERIA_01': 'MAIN_CAFETERIA',
+    'WP_ADMIN_PRINCIPAL_01': 'PRINCIPAL_OFFICE'
+  };
+
   // Icon Mappings for Destinations
   const iconMap = {
     'PRINCIPAL_OFFICE': '🏛️',
@@ -57,48 +67,94 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   /* ==========================================================================
-     1. ANIMATED CANVAS BACKGROUND
+     1. CYBER CONSTELLATION ANIMATED CANVAS BACKGROUND
      ========================================================================== */
   function initAnimatedBackground() {
     const canvas = document.getElementById('animated-bg');
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
     let width = canvas.width = window.innerWidth;
     let height = canvas.height = window.innerHeight;
 
+    let mouse = { x: width / 2, y: height / 2 };
+
+    window.addEventListener('mousemove', (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
+
     window.addEventListener('resize', () => {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
+      initParticles();
     });
 
-    let step = 0;
+    let particles = [];
+    const particleCount = Math.min(Math.floor(width * 0.04), 60);
+
+    function initParticles() {
+      particles = [];
+      for (let i = 0; i < particleCount; i++) {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.5,
+          radius: Math.random() * 2 + 1,
+          alpha: Math.random() * 0.5 + 0.2
+        });
+      }
+    }
+
     function draw() {
       ctx.clearRect(0, 0, width, height);
-      
-      // Draw background gradient waves
-      step += 0.008;
 
-      ctx.beginPath();
-      ctx.fillStyle = 'rgba(30, 86, 160, 0.04)';
-      ctx.moveTo(0, height);
-      for (let x = 0; x < width; x += 20) {
-        let y = Math.sin(x * 0.003 + step) * 40 + height * 0.7;
-        ctx.lineTo(x, y);
-      }
-      ctx.lineTo(width, height);
-      ctx.fill();
+      // Draw subtle ambient glow gradients
+      const grad1 = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 450);
+      grad1.addColorStop(0, 'rgba(56, 189, 248, 0.06)');
+      grad1.addColorStop(0.5, 'rgba(99, 102, 241, 0.03)');
+      grad1.addColorStop(1, 'transparent');
+      ctx.fillStyle = grad1;
+      ctx.fillRect(0, 0, width, height);
 
-      ctx.beginPath();
-      ctx.fillStyle = 'rgba(37, 99, 235, 0.03)';
-      ctx.moveTo(0, height);
-      for (let x = 0; x < width; x += 20) {
-        let y = Math.cos(x * 0.004 + step * 1.5) * 50 + height * 0.75;
-        ctx.lineTo(x, y);
+      // Render Particles & Constellation Lines
+      for (let i = 0; i < particles.length; i++) {
+        let p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(56, 189, 248, ${p.alpha})`;
+        ctx.fill();
+
+        // Connect nearby particles
+        for (let j = i + 1; j < particles.length; j++) {
+          let p2 = particles[j];
+          let dx = p.x - p2.x;
+          let dy = p.y - p2.y;
+          let dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 130) {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = `rgba(56, 189, 248, ${0.15 * (1 - dist / 130)})`;
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+          }
+        }
       }
-      ctx.lineTo(width, height);
-      ctx.fill();
 
       requestAnimationFrame(draw);
     }
+
+    initParticles();
     draw();
   }
 
@@ -116,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } catch (err) {
       console.error('Failed to load destinations:', err);
-      destinationGrid.innerHTML = '<div style="padding:20px; color:var(--red-danger);">Failed to load destinations from server. Make sure server.py is running.</div>';
+      destinationGrid.innerHTML = '<div style="grid-column: 1/-1; padding:30px; text-align:center; color:var(--accent-rose);">⚠️ Connection to Curbo server failed. Ensure server.py is running.</div>';
     }
   }
 
@@ -143,7 +199,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (itemsToRender.length === 0) {
       destinationGrid.innerHTML = `
-        <div style="grid-column: 1/-1; padding: 40px; text-align: center; color: var(--text-muted); background: var(--bg-card); border-radius: var(--border-radius);">
+        <div style="grid-column: 1/-1; padding: 48px; text-align: center; color: var(--text-muted); background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-glass);">
+          <div style="font-size: 32px; margin-bottom: 12px;">🔍</div>
           No matching destinations found for "<strong>${searchTerm}</strong>".
         </div>
       `;
@@ -157,10 +214,15 @@ document.addEventListener('DOMContentLoaded', () => {
       card.onclick = () => dispatchNavigation(item.key);
 
       card.innerHTML = `
-        <div class="dest-icon">${icon}</div>
+        <div class="dest-card-header">
+          <div class="dest-icon">${icon}</div>
+          <div class="dest-waypoint">${item.waypoint_id}</div>
+        </div>
         <div class="dest-title">${item.canonical_name}</div>
-        <div class="dest-waypoint">${item.waypoint_id}</div>
-        <div class="dest-action">Navigate Here ➔</div>
+        <div class="dest-action">
+          <span>Navigate Here</span>
+          <span style="font-size:14px;">➔</span>
+        </div>
       `;
       destinationGrid.appendChild(card);
     });
@@ -170,7 +232,10 @@ document.addEventListener('DOMContentLoaded', () => {
      3. DISPATCH NAVIGATION GOAL
      ========================================================================== */
   async function dispatchNavigation(destKey, queryText = null) {
-    curboNotice.innerHTML = `⏳ Sending navigation goal to Curbo...`;
+    curboNotice.innerHTML = `
+      <div class="notice-icon">⏳</div>
+      <div class="notice-content">Dispatching navigation command to Curbo AI...</div>
+    `;
     
     try {
       const payload = destKey ? { destination_key: destKey } : { query: queryText };
@@ -182,23 +247,38 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
 
       if (data.status === 'success') {
-        curboNotice.innerHTML = `✅ <strong>${data.destination}</strong><br>${data.message}`;
+        curboNotice.innerHTML = `
+          <div class="notice-icon">✅</div>
+          <div class="notice-content">
+            <strong style="color:var(--accent-cyan);">${data.destination}</strong><br>
+            ${data.message}
+          </div>
+        `;
         activeTargetText.innerText = data.destination;
         activeWaypointText.innerText = data.waypoint_id || '--';
         
         // Speak using Browser Speech Synthesis if supported
         if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
           const utter = new SpeechSynthesisUtterance(data.message);
+          utter.rate = 1.0;
+          utter.pitch = 1.0;
           window.speechSynthesis.speak(utter);
         }
 
         updateStatusUI(data.robot_state);
       } else {
-        curboNotice.innerHTML = `⚠️ ${data.message}`;
+        curboNotice.innerHTML = `
+          <div class="notice-icon">⚠️</div>
+          <div class="notice-content">${data.message}</div>
+        `;
       }
     } catch (err) {
       console.error('Error dispatching navigation:', err);
-      curboNotice.innerHTML = `❌ Connection error. Could not reach Curbo server.`;
+      curboNotice.innerHTML = `
+        <div class="notice-icon">❌</div>
+        <div class="notice-content">Could not connect to robot backend server.</div>
+      `;
     }
   }
 
@@ -210,7 +290,18 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch('/api/stop', { method: 'POST' });
       const data = await res.json();
       if (data.status === 'success') {
-        curboNotice.innerHTML = `🛑 <strong>Navigation Stopped</strong><br>${data.message}`;
+        curboNotice.innerHTML = `
+          <div class="notice-icon">🛑</div>
+          <div class="notice-content">
+            <strong style="color:var(--accent-rose);">Emergency Stop Triggered</strong><br>
+            ${data.message}
+          </div>
+        `;
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          const utter = new SpeechSynthesisUtterance("Robot navigation stopped.");
+          window.speechSynthesis.speak(utter);
+        }
         updateStatusUI(data.robot_state);
       }
     } catch (err) {
@@ -276,8 +367,8 @@ document.addEventListener('DOMContentLoaded', () => {
     recognition.onstart = () => {
       isRecording = true;
       btnMic.classList.add('recording');
-      btnMic.innerText = '🔴';
-      searchInput.placeholder = 'Listening to your voice...';
+      btnMic.innerHTML = '🔴';
+      searchInput.placeholder = 'Listening... Speak your destination...';
     };
 
     recognition.onresult = (event) => {
@@ -299,16 +390,32 @@ document.addEventListener('DOMContentLoaded', () => {
   function stopRecording() {
     isRecording = false;
     btnMic.classList.remove('recording');
-    btnMic.innerText = '🎤';
-    searchInput.placeholder = "Type destination or question (e.g. 'Exam Cell', 'Where is HR office?')...";
+    btnMic.innerHTML = '<span class="mic-icon">🎤</span>';
+    searchInput.placeholder = "Type a location or ask a question ('Exam Cell', 'Where is Principal office?')...";
   }
 
   /* ==========================================================================
-     7. EVENT LISTENERS & INIT
+     7. MAP NODE CLICK EVENT LISTENERS
+     ========================================================================== */
+  function initMapNodeClicks() {
+    document.querySelectorAll('.node').forEach(node => {
+      node.addEventListener('click', () => {
+        const id = node.id.replace('node-', '');
+        const key = waypointToKey[id];
+        if (key) {
+          dispatchNavigation(key);
+        }
+      });
+    });
+  }
+
+  /* ==========================================================================
+     8. EVENT LISTENERS & INIT
      ========================================================================== */
   initAnimatedBackground();
   fetchDestinations();
   initSpeechRecognition();
+  initMapNodeClicks();
   setInterval(pollStatus, 2500);
 
   // Search input filter on typing
@@ -328,6 +435,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Quick Suggestion Chips click
+  document.querySelectorAll('.chip-btn').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const q = chip.getAttribute('data-query');
+      if (q) {
+        searchInput.value = q;
+        renderGrid();
+        dispatchNavigation(null, q);
+      }
+    });
+  });
+
   // Mic button click
   btnMic.addEventListener('click', () => {
     if (!recognition) return;
@@ -343,10 +462,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Category tab clicks
   categoryTabs.addEventListener('click', (e) => {
-    if (e.target.classList.contains('tab-btn')) {
+    const tabBtn = e.target.closest('.tab-btn');
+    if (tabBtn) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      e.target.classList.add('active');
-      currentCategory = e.target.getAttribute('data-category');
+      tabBtn.classList.add('active');
+      currentCategory = tabBtn.getAttribute('data-category');
       renderGrid();
     }
   });
