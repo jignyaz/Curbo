@@ -3,246 +3,455 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Curbo Campus Guide Robot - Next-Gen Kiosk Console</title>
-  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <title>Curbo Autonomous Robot Simulation – Campus Guide & Navigation Subsystem</title>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <!-- CSS Stylesheet -->
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- Dynamic Canvas Background (Interactive Cyber Particle Grid & Ambient Lights) -->
-  <canvas id="animated-bg"></canvas>
-
   <div class="app-container">
 
-    <!-- FLOATING GLASS HEADER & ROBOT TELEMETRY BAR -->
+    <!-- ENTERPRISE HEADER & ROBOT TELEMETRY BAR -->
     <header class="header-card">
       <div class="brand-section">
         <div class="brand-logo-container">
-          <div class="brand-logo">🤖</div>
-          <span class="online-dot"></span>
+          <div class="brand-logo" title="Curbo Autonomous Navigation System">🤖</div>
+          <span class="online-dot" title="Hardware Link Online"></span>
         </div>
         <div class="brand-title">
-          <div class="brand-badge">CURBO AI AUTONOMOUS GUIDE</div>
-          <h1>Campus Navigation Kiosk</h1>
+          <div class="brand-badge">CURBO AUTONOMOUS ROBOT SIMULATION</div>
+          <h1>Campus Guide & Navigation Subsystem</h1>
+          <div class="brand-subtitle">University Facilities & Autonomous Wayfinding Portal</div>
         </div>
       </div>
 
       <div class="header-actions">
-        <!-- Live Robot Telemetry Stats -->
-        <div class="telemetry-chip">
-          <span class="chip-icon">⚡</span>
-          <span class="chip-text">98% Batt</span>
-        </div>
-        <div class="telemetry-chip">
-          <span class="chip-icon">📶</span>
-          <span class="chip-text">5G Online</span>
+        <!-- Live Robot Telemetry Indicators -->
+        <div class="telemetry-chip" title="Battery Power Status">
+          <span class="chip-icon">🔋</span>
+          <span id="header-battery" class="chip-text">98% Batt</span>
         </div>
         
-        <div id="robot-status-badge" class="status-badge idle">
+        <div class="telemetry-chip" title="360° LiDAR Scanner Online">
+          <span class="pulse-indicator online"></span>
+          <span class="chip-text">LiDAR Active</span>
+        </div>
+        
+        <div id="robot-status-badge" class="status-badge standby">
           <span class="pulse-dot"></span>
           <span id="status-text">STANDBY / IDLE</span>
         </div>
 
-        <button id="btn-emergency-stop" class="btn btn-danger">
+        <button id="btn-emergency-stop" class="btn btn-emergency" title="Immediate Safety Interlock Halt">
           <span class="stop-icon">⛔</span>
-          <span>STOP ROBOT</span>
+          <span>EMERGENCY STOP</span>
         </button>
       </div>
     </header>
 
-    <!-- MAIN DASHBOARD LAYOUT -->
-    <div class="dashboard-grid">
+    <!-- VIEW MODE SELECTOR (SEGMENTED TABS) -->
+    <nav class="view-mode-bar" aria-label="Simulation Views">
+      <button id="tab-sim-view" class="view-tab-btn active" type="button">
+        <span class="tab-icon">🗺️</span>
+        <span>2D Robot Simulation Arena (5 Destinations)</span>
+      </button>
+      <button id="tab-kiosk-view" class="view-tab-btn" type="button">
+        <span class="tab-icon">🏢</span>
+        <span>Campus Directory Kiosk (25 Locations)</span>
+      </button>
+    </nav>
 
-      <!-- LEFT MAIN CONTENT AREA -->
-      <main>
-        
-        <!-- Search & Voice Command Section -->
-        <section class="search-card">
-          <div class="search-header">
-            <div class="search-title">
-              <span class="search-sparkle">✨</span> Where would you like to go today?
+    <!-- ====================================================================
+         SECTION 1: INTERACTIVE 2D ROBOT SIMULATION ARENA & LIVE SPEECH COMMAND
+         ==================================================================== -->
+    <section id="simulation-view" class="simulation-section">
+      
+      <!-- SPEECH COMMAND PANEL -->
+      <div class="speech-command-card">
+        <div class="speech-header">
+          <div class="speech-title">
+            <span class="speech-icon">🎙️</span>
+            <div>
+              <h3>Live Speech Command Input</h3>
+              <p>Speak any destination or motion command in natural language — Curbo processes intent and navigates in real-time.</p>
             </div>
-            <span class="voice-hint">Voice & Touch Enabled</span>
           </div>
 
-          <div class="search-input-group">
-            <div class="input-wrapper">
-              <span class="input-icon">🔍</span>
-              <input 
-                type="text" 
-                id="search-input" 
-                class="search-input" 
-                placeholder="Type a location or ask a question ('Exam Cell', 'Where is Principal office?')..."
-                autocomplete="off"
-              >
-            </div>
-            <button id="btn-mic" class="btn btn-mic" title="Voice Search (Click & Speak)">
-              <span class="mic-icon">🎤</span>
+          <div class="speech-action-group">
+            <button id="btn-sim-mic" class="btn btn-mic-primary" title="Click to Speak Command" type="button">
+              <span class="mic-wave-ring"></span>
+              <span class="mic-icon-large">🎤</span>
+              <span id="mic-btn-label">SPEAK COMMAND</span>
             </button>
-            <button id="btn-search" class="btn btn-primary">
-              <span>Navigate</span>
-              <span class="btn-arrow">➔</span>
+
+            <button id="btn-continuous-mic" class="btn btn-toggle-listen" title="Hands-free continuous voice recognition" type="button">
+              <span class="toggle-dot"></span>
+              <span id="listen-toggle-text">Always Listening: OFF</span>
             </button>
-          </div>
-
-          <!-- Quick Suggestion Chips -->
-          <div class="quick-chips">
-            <span class="chips-label">Popular Destinations:</span>
-            <button class="chip-btn" data-query="Exam Cell">📝 Exam Cell</button>
-            <button class="chip-btn" data-query="Reception">ℹ️ Reception</button>
-            <button class="chip-btn" data-query="CSE Block">💻 CSE Block</button>
-            <button class="chip-btn" data-query="Principal Office">🏛️ Principal</button>
-            <button class="chip-btn" data-query="Cafeteria">☕ Cafeteria</button>
-          </div>
-        </section>
-
-        <!-- Navigation Category Tabs -->
-        <nav class="categories-bar" id="category-tabs">
-          <button class="tab-btn active" data-category="ALL">
-            <span>✨ All Locations</span>
-          </button>
-          <button class="tab-btn" data-category="Administration">
-            <span>🏛️ Administration</span>
-          </button>
-          <button class="tab-btn" data-category="Academic Departments">
-            <span>🎓 Academic Depts</span>
-          </button>
-          <button class="tab-btn" data-category="Facilities & Amenities">
-            <span>☕ Facilities & Amenities</span>
-          </button>
-        </nav>
-
-        <!-- Interactive Destination Card Grid -->
-        <section id="destination-grid" class="destination-grid">
-          <!-- Dynamically populated via app.js -->
-        </section>
-      </main>
-
-      <!-- RIGHT SIDEBAR: INTERACTIVE MAP & ROBOT TELEMETRY -->
-      <aside class="sidebar-panel">
-        
-        <!-- Curbo Assistant Telemetry & Notice Box -->
-        <div class="card robot-info-card">
-          <div class="card-header">
-            <div class="card-title">
-              <span class="title-icon">📢</span> Curbo AI Assistant
-            </div>
-            <span id="last-time" class="time-stamp">--:--</span>
-          </div>
-
-          <div class="notice-box" id="curbo-notice">
-            <div class="notice-icon">💬</div>
-            <div class="notice-content">
-              Welcome to Campus Guide! Select any destination or use voice search to navigate.
-            </div>
-          </div>
-
-          <div class="telemetry-details">
-            <div class="tele-item">
-              <span class="tele-label">Active Target</span>
-              <span id="active-target-text" class="tele-val highlight">None</span>
-            </div>
-            <div class="tele-item">
-              <span class="tele-label">Waypoint ID</span>
-              <code id="active-waypoint-text" class="tele-code">--</code>
-            </div>
           </div>
         </div>
 
-        <!-- Campus Interactive Node Map Card -->
-        <div class="card map-card">
-          <div class="card-header">
-            <div class="card-title">
-              <span class="title-icon">🗺️</span> Live Campus Map Node
+        <!-- Real-Time Speech Feedback & Waveform Visualizer -->
+        <div class="speech-feedback-row">
+          <div class="speech-transcript-box">
+            <div class="transcript-meta">
+              <span class="meta-label">LIVE VOICE TRANSCRIPT</span>
+              <span id="speech-intent-pill" class="intent-pill idle">Awaiting voice command...</span>
             </div>
-            <span class="map-badge">GPS ACTIVE</span>
+            <div id="speech-transcript-bubble" class="transcript-text">
+              Click <strong>"SPEAK COMMAND"</strong> or say: <em>"Take me to Exam Cell"</em>, <em>"Go to Cafeteria"</em>, <em>"Move to Library"</em>, <em>"Head to CSE Lab"</em>, <em>"Return to Reception"</em>, or <em>"Stop"</em>!
+            </div>
+            <div id="speech-robot-response" class="robot-reply-text">
+              🤖 <strong>Curbo:</strong> "Standing by at the Reception Dock. Where would you like to go?"
+            </div>
           </div>
 
-          <div class="map-container">
-            <svg class="map-svg" viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg">
-              <!-- Dark Grid Pattern -->
-              <defs>
-                <pattern id="grid-pattern" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255, 255, 255, 0.05)" stroke-width="1"/>
-                </pattern>
-                <linearGradient id="path-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#38bdf8"/>
-                  <stop offset="100%" stop-color="#818cf8"/>
-                </linearGradient>
-              </defs>
-
-              <rect width="100%" height="100%" fill="url(#grid-pattern)" />
-
-              <!-- Pathway connection lines -->
-              <path d="M 50 190 L 120 190 L 120 120 L 220 120 L 220 60 L 340 60" stroke="rgba(56, 189, 248, 0.4)" stroke-width="3" stroke-dasharray="6,4" fill="none"/>
-              <path d="M 120 120 L 340 120 L 340 190" stroke="rgba(56, 189, 248, 0.4)" stroke-width="3" stroke-dasharray="6,4" fill="none"/>
-
-              <!-- Interactive Node Locations -->
-              <!-- Reception Node -->
-              <g class="node" id="node-WP_ADMIN_RECEPTION_06" transform="translate(50, 190)">
-                <circle r="12" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
-                <circle r="5" fill="#38bdf8"/>
-                <text y="-18" font-size="10" font-weight="600" text-anchor="middle" fill="#e2e8f0">Reception</text>
-              </g>
-
-              <!-- Exam Cell Node -->
-              <g class="node" id="node-WP_ADMIN_EXAM_04" transform="translate(120, 120)">
-                <circle r="12" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
-                <circle r="5" fill="#38bdf8"/>
-                <text y="-18" font-size="10" font-weight="600" text-anchor="middle" fill="#e2e8f0">Exam Cell</text>
-              </g>
-
-              <!-- CSE Dept Node -->
-              <g class="node" id="node-WP_DEPT_CSE_01" transform="translate(220, 120)">
-                <circle r="12" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
-                <circle r="5" fill="#38bdf8"/>
-                <text y="-18" font-size="10" font-weight="600" text-anchor="middle" fill="#e2e8f0">CSE Block</text>
-              </g>
-
-              <!-- HR Office Node -->
-              <g class="node" id="node-WP_ADMIN_HR_05" transform="translate(220, 60)">
-                <circle r="12" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
-                <circle r="5" fill="#38bdf8"/>
-                <text y="-18" font-size="10" font-weight="600" text-anchor="middle" fill="#e2e8f0">HR Office</text>
-              </g>
-
-              <!-- Cafeteria Node -->
-              <g class="node" id="node-WP_FAC_CAFETERIA_01" transform="translate(340, 120)">
-                <circle r="12" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
-                <circle r="5" fill="#38bdf8"/>
-                <text y="-18" font-size="10" font-weight="600" text-anchor="middle" fill="#e2e8f0">Cafeteria</text>
-              </g>
-
-              <!-- Principal Office Node -->
-              <g class="node" id="node-WP_ADMIN_PRINCIPAL_01" transform="translate(340, 60)">
-                <circle r="12" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
-                <circle r="5" fill="#38bdf8"/>
-                <text y="-18" font-size="10" font-weight="600" text-anchor="middle" fill="#e2e8f0">Principal</text>
-              </g>
-
-              <!-- Curbo Robot Icon Marker -->
-              <g id="curbo-map-robot" transform="translate(50, 190)" style="transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);">
-                <circle r="16" fill="rgba(16, 185, 129, 0.25)" stroke="#10b981" stroke-width="2" class="robot-pulse-ring"/>
-                <circle r="10" fill="#10b981"/>
-                <text y="3.5" font-size="10" text-anchor="middle">🤖</text>
-              </g>
-            </svg>
+          <!-- Audio spectrum reactive canvas -->
+          <div class="wave-visualizer-container">
+            <canvas id="audio-wave-canvas" width="220" height="60"></canvas>
+            <span class="wave-label">SPEECH AUDIO SPECTRUM</span>
           </div>
         </div>
 
-      </aside>
-    </div>
+        <!-- Quick Speech Command Chips & Text Input Fallback -->
+        <div class="speech-bottom-bar">
+          <div class="quick-speech-chips">
+            <span class="chips-label">Quick Commands:</span>
+            <button type="button" class="speech-chip" data-command="Take me to Exam Cell">📝 Exam Cell</button>
+            <button type="button" class="speech-chip" data-command="Go to Cafeteria">☕ Cafeteria</button>
+            <button type="button" class="speech-chip" data-command="Take me to Central Library">📚 Central Library</button>
+            <button type="button" class="speech-chip" data-command="Guide me to CSE Department">💻 CSE Tech Lab</button>
+            <button type="button" class="speech-chip" data-command="Return to Reception Desk">🏛️ Reception Desk</button>
+            <button type="button" class="speech-chip chip-stop" data-command="Stop robot">⛔ Stop</button>
+          </div>
+
+          <div class="sim-text-box">
+            <input type="text" id="sim-text-input" placeholder="Type a destination command or room name..." autocomplete="off">
+            <button id="btn-sim-text-send" type="button" class="btn btn-primary-sm">Send</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIMULATION TELEMETRY HUD BAR -->
+      <div class="sim-hud-bar">
+        <div class="hud-item">
+          <span class="hud-label">ROBOT STATUS</span>
+          <span id="hud-status" class="hud-value status-badge-inline">STANDBY</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">ACTIVE MISSION</span>
+          <span id="hud-destination" class="hud-value">Reception & Dock</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">COORDINATES</span>
+          <span id="hud-coords" class="hud-value font-mono">X: 1.40m | Y: 4.00m</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">HEADING (θ)</span>
+          <span id="hud-heading" class="hud-value font-mono">🧭 0° [N]</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">VELOCITY</span>
+          <span id="hud-speed" class="hud-value font-mono">0.00 m/s</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">DISTANCE TO GOAL</span>
+          <span id="hud-distance" class="hud-value font-mono">0.0 m</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">LIDAR SCANNER</span>
+          <span id="hud-lidar" class="hud-value text-success">ALL CLEAR (360°)</span>
+        </div>
+      </div>
+
+      <!-- MAIN 2D SIMULATION CANVAS ARENA -->
+      <div class="sim-arena-card">
+        <div class="arena-header">
+          <div class="arena-title">
+            <span class="arena-icon">🗺️</span>
+            <span>Campus Autonomous Navigation Arena</span>
+            <span class="arena-badge">INTERACTIVE 2D SIMULATOR</span>
+          </div>
+
+          <!-- Arena Toolbar Controls -->
+          <div class="arena-toolbar">
+            <div class="speed-control-group">
+              <span class="toolbar-label">Speed:</span>
+              <button type="button" class="speed-btn active" data-speed="1">1x</button>
+              <button type="button" class="speed-btn" data-speed="2">2x</button>
+              <button type="button" class="speed-btn" data-speed="4">4x</button>
+            </div>
+
+            <button id="btn-toggle-obstacle" type="button" class="btn btn-toolbar" title="Click on corridor to drop obstacle">
+              <span>⚠️ Place Obstacle</span>
+            </button>
+
+            <button id="btn-auto-tour" type="button" class="btn btn-toolbar" title="Tour all 5 destinations continuously">
+              <span>🎲 Auto Tour</span>
+            </button>
+
+            <button id="btn-dock-reception" type="button" class="btn btn-toolbar" title="Return to Reception Dock Station">
+              <span>🏠 Return to Dock</span>
+            </button>
+
+            <button id="btn-clear-trail" type="button" class="btn btn-toolbar" title="Clear path breadcrumbs & obstacles">
+              <span>🧹 Reset View</span>
+            </button>
+
+            <button id="btn-toggle-sound" type="button" class="btn btn-toolbar" title="Toggle audio chime and speech synthesizer">
+              <span id="sound-icon">🔊 Sound ON</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- The Canvas Arena -->
+        <div class="canvas-viewport">
+          <canvas id="sim-canvas" width="900" height="520"></canvas>
+          
+          <!-- Overlay Instructions -->
+          <div class="canvas-overlay-hint">
+            <span>💡 Click any destination room or corridor on the map to navigate manually!</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5 DESTINATION QUICK NAVIGATION CARDS -->
+      <div class="destinations-5-grid">
+        <!-- 1. Reception -->
+        <div class="dest-5-card active-location" id="card-dest-RECEPTION" data-key="RECEPTION">
+          <div class="dest-5-header">
+            <div class="dest-5-icon">🏛️</div>
+            <div class="dest-5-badge">BASE DOCK</div>
+          </div>
+          <h4>Reception & Welcome Desk</h4>
+          <div class="dest-5-waypoint">WP_ADMIN_RECEPTION_06</div>
+          <p class="dest-5-desc">Main visitor entrance, information lobby & robot charging station.</p>
+          <div class="dest-5-footer">
+            <span class="dest-5-dist" id="dist-RECEPTION">At Location (Docked)</span>
+            <button type="button" class="btn btn-card-nav" onclick="triggerDestination('RECEPTION')">Navigate ➔</button>
+          </div>
+        </div>
+
+        <!-- 2. Central Library -->
+        <div class="dest-5-card" id="card-dest-LIBRARY" data-key="LIBRARY">
+          <div class="dest-5-header">
+            <div class="dest-5-icon">📚</div>
+            <div class="dest-5-badge">ZONE A</div>
+          </div>
+          <h4>Central Library</h4>
+          <div class="dest-5-waypoint">WP_FACILITY_LIB_01</div>
+          <p class="dest-5-desc">Quiet study rooms, digital book archives & reference material desks.</p>
+          <div class="dest-5-footer">
+            <span class="dest-5-dist" id="dist-LIBRARY">14.0 m away</span>
+            <button type="button" class="btn btn-card-nav" onclick="triggerDestination('LIBRARY')">Navigate ➔</button>
+          </div>
+        </div>
+
+        <!-- 3. Exam Cell -->
+        <div class="dest-5-card" id="card-dest-EXAM_CELL" data-key="EXAM_CELL">
+          <div class="dest-5-header">
+            <div class="dest-5-icon">📝</div>
+            <div class="dest-5-badge">ZONE B</div>
+          </div>
+          <h4>Exam Cell & COE</h4>
+          <div class="dest-5-waypoint">WP_ADMIN_EXAM_04</div>
+          <p class="dest-5-desc">Controller of Examinations, hall ticket counter & evaluation office.</p>
+          <div class="dest-5-footer">
+            <span class="dest-5-dist" id="dist-EXAM_CELL">18.5 m away</span>
+            <button type="button" class="btn btn-card-nav" onclick="triggerDestination('EXAM_CELL')">Navigate ➔</button>
+          </div>
+        </div>
+
+        <!-- 4. CSE Tech Lab -->
+        <div class="dest-5-card" id="card-dest-CSE_DEPARTMENT" data-key="CSE_DEPARTMENT">
+          <div class="dest-5-header">
+            <div class="dest-5-icon">💻</div>
+            <div class="dest-5-badge">ZONE C</div>
+          </div>
+          <h4>CSE Tech Lab & Dept</h4>
+          <div class="dest-5-waypoint">WP_DEPT_CSE_01</div>
+          <p class="dest-5-desc">Computer Science labs, AI/Robotics workstation clusters & server room.</p>
+          <div class="dest-5-footer">
+            <span class="dest-5-dist" id="dist-CSE_DEPARTMENT">25.0 m away</span>
+            <button type="button" class="btn btn-card-nav" onclick="triggerDestination('CSE_DEPARTMENT')">Navigate ➔</button>
+          </div>
+        </div>
+
+        <!-- 5. Cafeteria -->
+        <div class="dest-5-card" id="card-dest-CAFETERIA" data-key="CAFETERIA">
+          <div class="dest-5-header">
+            <div class="dest-5-icon">☕</div>
+            <div class="dest-5-badge">ZONE D</div>
+          </div>
+          <h4>Cafeteria & Lounge</h4>
+          <div class="dest-5-waypoint">WP_AMENITY_CANTEEN_01</div>
+          <p class="dest-5-desc">Campus dining, fresh food counters, coffee bar & open seating lounge.</p>
+          <div class="dest-5-footer">
+            <span class="dest-5-dist" id="dist-CAFETERIA">19.2 m away</span>
+            <button type="button" class="btn btn-card-nav" onclick="triggerDestination('CAFETERIA')">Navigate ➔</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIMULATION REAL-TIME EVENT & SPEECH LOG -->
+      <div class="sim-terminal-card">
+        <div class="terminal-header">
+          <div class="terminal-title-group">
+            <span class="terminal-status-dot"></span>
+            <span class="terminal-title">CURBO ROBOT TELEMETRY & SPEECH EVENT DISPATCH LOG</span>
+          </div>
+          <button id="btn-clear-log" type="button" class="terminal-clear-btn">Clear Log</button>
+        </div>
+        <div id="sim-terminal-body" class="terminal-body">
+          <div class="log-line"><span class="log-time">[SYSTEM INIT]</span> Curbo Autonomous Guide Simulation ready. Speech recognition engine online.</div>
+          <div class="log-line"><span class="log-time">[ROBOT STATE]</span> Robot docked at Reception (X: 1.40m, Y: 4.00m, θ: 0°). Awaiting spoken destination command.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 2: FULL CAMPUS KIOSK DIRECTORY (ALL 25 DESTINATIONS)
+         ==================================================================== -->
+    <section id="kiosk-view" class="kiosk-section" style="display: none;">
+      <div class="dashboard-grid">
+        <!-- LEFT MAIN CONTENT AREA -->
+        <main class="kiosk-main">
+          <!-- Search Section -->
+          <section class="search-card">
+            <div class="search-header">
+              <div class="search-title">
+                <h2>Find a Campus Location</h2>
+                <p>Search across academic departments, administrative offices, and student facilities.</p>
+              </div>
+              <div class="search-badge-wrapper">
+                <span id="waypoint-count-badge" class="count-badge">25 Waypoints Available</span>
+              </div>
+            </div>
+
+            <div class="search-input-group">
+              <div class="input-wrapper">
+                <span class="input-icon">🔍</span>
+                <input 
+                  type="text" 
+                  id="search-input" 
+                  class="search-input" 
+                  placeholder="Type a location name or department ('Library', 'Exam Cell', 'Principal Office')..."
+                  autocomplete="off"
+                >
+              </div>
+              <button id="btn-kiosk-search" type="button" class="btn btn-primary">
+                <span>Filter</span>
+              </button>
+            </div>
+          </section>
+
+          <!-- Navigation Category Tabs -->
+          <nav class="categories-bar" id="category-tabs" aria-label="Campus Categories">
+            <button type="button" class="tab-btn active" data-category="ALL">
+              <span class="cat-icon">🏛️</span>
+              <span>All Locations</span>
+            </button>
+            <button type="button" class="tab-btn" data-category="Administration">
+              <span class="cat-icon">🏢</span>
+              <span>Administration</span>
+            </button>
+            <button type="button" class="tab-btn" data-category="Academic Departments">
+              <span class="cat-icon">🎓</span>
+              <span>Academic Departments</span>
+            </button>
+            <button type="button" class="tab-btn" data-category="Facilities & Amenities">
+              <span class="cat-icon">☕</span>
+              <span>Facilities & Amenities</span>
+            </button>
+          </nav>
+
+          <!-- Interactive Destination Card Grid -->
+          <section id="destination-grid" class="destination-grid">
+            <!-- Dynamically populated via app.js -->
+          </section>
+        </main>
+
+        <!-- RIGHT SIDEBAR: ASSISTANT TELEMETRY & GUIDE -->
+        <aside class="sidebar-panel">
+          <!-- Assistant Card -->
+          <div class="card robot-info-card">
+            <div class="card-header">
+              <div class="card-title">
+                <span class="title-icon">🤖</span> Curbo AI Assistant
+              </div>
+              <span id="last-time" class="time-stamp">--:--</span>
+            </div>
+
+            <div class="notice-box" id="curbo-notice">
+              <div class="notice-icon">💬</div>
+              <div class="notice-content">
+                Welcome to Campus Guide! Select any destination from the directory or use voice search to navigate.
+              </div>
+            </div>
+
+            <div class="telemetry-details">
+              <div class="tele-item">
+                <span class="tele-label">Active Target</span>
+                <span id="active-target-text" class="tele-val highlight">Reception Desk</span>
+              </div>
+              <div class="tele-item">
+                <span class="tele-label">Waypoint ID</span>
+                <code id="active-waypoint-text" class="tele-code">WP_ADMIN_RECEPTION_06</code>
+              </div>
+            </div>
+          </div>
+
+          <!-- Instructions Card -->
+          <div class="card guide-info-card">
+            <div class="guide-header">
+              <span class="guide-icon">🧭</span>
+              <h4>Navigation Instructions</h4>
+            </div>
+            <ul class="guide-list">
+              <li><strong>Select Location:</strong> Click any directory card to dispatch the robot immediately in the simulator.</li>
+              <li><strong>Search & Filter:</strong> Use the search bar or category tabs above to find specific faculties or facilities.</li>
+              <li><strong>Voice Navigation:</strong> Switch to the 2D Simulator to use microphone speech commands hands-free.</li>
+              <li><strong>Safety Stop:</strong> Click the red <em>Emergency Stop</em> button in the header at any time to pause movement.</li>
+            </ul>
+          </div>
+
+          <!-- Safety Status Card -->
+          <div class="card safety-info-card">
+            <div class="safety-header">
+              <span class="safety-icon">🛡️</span>
+              <h4>Operational Safety Status</h4>
+            </div>
+            <div class="safety-items">
+              <div class="safety-row">
+                <span class="safety-label">LiDAR Scanner:</span>
+                <span class="safety-val status-ok">360° Clear</span>
+              </div>
+              <div class="safety-row">
+                <span class="safety-label">Obstacle Interlock:</span>
+                <span class="safety-val status-ok">Active</span>
+              </div>
+              <div class="safety-row">
+                <span class="safety-label">Collision Avoidance:</span>
+                <span class="safety-val status-ok">Dynamic Dijkstra</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
 
     <!-- FOOTER -->
     <footer class="app-footer">
       <div class="footer-content">
-        <span>CURBO AUTONOMOUS GUIDE SYSTEM v2.5</span>
+        <span class="footer-title">CURBO AUTONOMOUS GUIDE SYSTEM</span>
         <span class="footer-sep">•</span>
-        <span>AI-POWERED CAMPUS NAVIGATION & VOICE KIOSK CONSOLE</span>
+        <span>CAMPUS GUIDE & NAVIGATION SUBSYSTEM</span>
+        <span class="footer-sep">•</span>
+        <span>INSTITUTIONAL ROBOTIC MOBILITY PLATFORM</span>
       </div>
     </footer>
   </div>
@@ -251,4 +460,3 @@
   <script src="app.js"></script>
 </body>
 </html>
-

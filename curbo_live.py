@@ -72,8 +72,28 @@ def main():
             # Robot Action Dispatch Hook
             if result.intent_type == "NAVIGATE" and result.waypoint_id:
                 print(f"[ROBOT ACTION] Dispatched Nav Goal -> {result.waypoint_id} ({result.target})")
+                try:
+                    import urllib.request, json
+                    req = urllib.request.Request(
+                        "http://localhost:5000/api/navigate",
+                        data=json.dumps({"destination_key": result.target}).encode("utf-8"),
+                        headers={"Content-Type": "application/json"}
+                    )
+                    with urllib.request.urlopen(req, timeout=1.5) as resp:
+                        pass
+                    print("  [+] Synchronized with live web simulation!")
+                except Exception:
+                    pass  # Web server might not be running
             elif result.intent_type == "MOTION_CONTROL":
                 print(f"[ROBOT ACTION] Dispatched Motion Command -> {result.target}")
+                if result.target == "STOP":
+                    try:
+                        import urllib.request
+                        req = urllib.request.Request("http://localhost:5000/api/stop", data=b"{}", headers={"Content-Type": "application/json"})
+                        with urllib.request.urlopen(req, timeout=1.5) as resp:
+                            pass
+                    except Exception:
+                        pass
             elif result.intent_type == "CONVERSATION":
                 print(f"[ROBOT ACTION] Fallback Conversation Prompt")
 

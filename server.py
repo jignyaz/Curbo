@@ -25,15 +25,35 @@ CORS(app)
 # Initialize Intent Parser
 parser = IntentParser()
 
+# Lazy STT Engine reference
+stt_engine = None
+
+def get_stt_engine():
+    global stt_engine
+    if stt_engine is None:
+        try:
+            from curbo_speech import STTEngine
+            stt_engine = STTEngine(model_size="base")
+        except Exception as err:
+            print(f"[Warning] Failed to load Whisper STTEngine: {err}")
+    return stt_engine
+
 # Global State for Curbo Robot
 curbo_state: Dict[str, Any] = {
     "status": "IDLE",  # IDLE, NAVIGATING, ARRIVED, ERROR
-    "active_destination": None,
-    "waypoint_id": None,
+    "active_destination": "Reception & Welcome Desk",
+    "destination_key": "RECEPTION",
+    "waypoint_id": "WP_ADMIN_RECEPTION_06",
     "confirmation_msg": "Curbo is standing by at the main lobby.",
     "last_command_time": None,
-    "tts_enabled": True
+    "tts_enabled": True,
+    "x": 120.0,
+    "y": 440.0,
+    "theta": 0.0,
+    "speed": 0.0,
+    "battery": 98.0
 }
+
 
 
 @app.route("/")
@@ -136,27 +156,121 @@ def navigate():
     # Update robot state
     curbo_state["status"] = "NAVIGATING"
     curbo_state["active_destination"] = canonical_name
+    curbo_state["destination_key"] = dest_key if dest_key else (res.target if 'res' in locals() else None)
     curbo_state["waypoint_id"] = waypoint_id
     curbo_state["confirmation_msg"] = msg
     curbo_state["last_command_time"] = time.strftime("%H:%M:%S")
 
-    print(f"\n[ROBOT WEB DISPATCH] Destination: {canonical_name} | Waypoint: {waypoint_id}")
+    print(f"\n[ROBOT WEB DISPATCH] Destination: {canonical_name} | Waypoint: {waypoint_id} (Key: {curbo_state['destination_key']})")
 
     return jsonify({
         "status": "success",
         "message": msg,
         "destination": canonical_name,
+        "destination_key": curbo_state["destination_key"],
         "waypoint_id": waypoint_id,
         "robot_state": curbo_state
     })
+
+
+@app.route("/api/voice_navigate", methods=["POST"])
+def voice_navigate():
+    """
+    Accepts recorded voice audio (WAV/WEBM) or text audio transcript.
+    Processes speech with Whisper and triggers navigation.
+    """
+    transcript = None
+    
+    # 1. If audio file is uploaded
+    if "audio" in request.files:
+        audio_file = request.files["audio"]
+        temp_path = os.path.join("audio_files", f"live_web_{int(time.time())}.wav")
+        os.makedirs("audio_files", exist_ok=True)
+        audio_file.save(temp_path)
+        
+        engine = get_stt_engine()
+        if engine:
+            try:
+                # Transcribe saved audio
+                transcript = engine.model.transcribe(temp_path, language="en", fp16=False)["text"].strip()
+                print(f"[Whisper STT Server] Transcribed audio -> '{transcript}'")
+            except Exception as e:
+                print(f"[Whisper STT Error] {e}")
+                return jsonify({"status": "error", "message": f"Whisper transcription failed: {e}"}), 500
+        else:
+            return jsonify({"status": "error", "message": "Whisper engine is not initialized"}), 500
+            
+    # 2. Or fallback to JSON text query
+    elif request.json and "query" in request.json:
+        transcript = request.json.get("query")
+    
+    if not transcript:
+        return jsonify({"status": "error", "message": "No audio file or text query provided"}), 400
+
+    # Parse intent using RapidFuzz
+    res: CurboIntentResult = parser.parse(transcript)
+    if res.intent_type == "NAVIGATE" and res.target in DESTINATIONS:
+        target_info = DESTINATIONS[res.target]
+        curbo_state["status"] = "NAVIGATING"
+        curbo_state["active_destination"] = target_info["canonical_name"]
+        curbo_state["destination_key"] = res.target
+        curbo_state["waypoint_id"] = target_info["waypoint_id"]
+        curbo_state["confirmation_msg"] = target_info["confirmation_msg"]
+        curbo_state["last_command_time"] = time.strftime("%H:%M:%S")
+
+        return jsonify({
+            "status": "success",
+            "transcript": transcript,
+            "intent": res.intent_type,
+            "target": res.target,
+            "confidence": res.confidence,
+            "destination": target_info["canonical_name"],
+            "destination_key": res.target,
+            "waypoint_id": target_info["waypoint_id"],
+            "message": target_info["confirmation_msg"],
+            "robot_state": curbo_state
+        })
+    elif res.intent_type == "MOTION_CONTROL":
+        if res.target == "STOP":
+            curbo_state["status"] = "IDLE"
+            curbo_state["speed"] = 0.0
+            curbo_state["confirmation_msg"] = "Robot stopped."
+        return jsonify({
+            "status": "success",
+            "transcript": transcript,
+            "intent": "MOTION_CONTROL",
+            "target": res.target,
+            "message": f"Executed motion control: {res.target}",
+            "robot_state": curbo_state
+        })
+    else:
+        return jsonify({
+            "status": "warning",
+            "transcript": transcript,
+            "intent": res.intent_type,
+            "target": res.target,
+            "confidence": res.confidence,
+            "message": f"Could not map '{transcript}' to a recognized destination. Please try again."
+        }), 400
+
+
+@app.route("/api/telemetry", methods=["GET", "POST"])
+def telemetry():
+    """Reads or updates real-time simulated robot position & telemetry."""
+    if request.method == "POST":
+        data = request.json or {}
+        for key in ["x", "y", "theta", "speed", "battery", "status"]:
+            if key in data:
+                curbo_state[key] = data[key]
+        return jsonify({"status": "success", "robot_state": curbo_state})
+    return jsonify({"status": "success", "robot_state": curbo_state})
 
 
 @app.route("/api/stop", methods=["POST"])
 def stop_robot():
     """Emergency stop / clear navigation goal."""
     curbo_state["status"] = "IDLE"
-    curbo_state["active_destination"] = None
-    curbo_state["waypoint_id"] = None
+    curbo_state["speed"] = 0.0
     curbo_state["confirmation_msg"] = "Curbo navigation stopped. Ready for next command."
     curbo_state["last_command_time"] = time.strftime("%H:%M:%S")
 
